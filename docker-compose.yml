@@ -1,0 +1,67 @@
+version: '3.8'
+services:
+  php-apache-environment:
+    container_name: php-apache
+    build:
+        context: .
+        dockerfile: Dockerfile
+    depends_on:
+        - db
+    volumes:
+        - ./t37import:/var/www/html/
+    ports:
+        - 8000:80
+
+  db:
+    container_name: db
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: R00tPassword!
+      MYSQL_DATABASE: task37
+      MYSQL_USER: digiprime
+      MYSQL_PASSWORD: Horizon2020
+    ports:
+        - "9936:3306"
+
+  phpmyadmin:
+    container_name: phpadmin
+    image: phpmyadmin/phpmyadmin
+    ports:
+        - '8080:80'
+    restart: always
+    environment:
+        PMA_HOST: db
+    depends_on:
+        - db
+
+  web:
+    image: nginx
+    container_name: frontend8081
+    volumes:
+     - ./frontend:/usr/share/nginx/html
+    ports:
+     - "8081:80"
+
+  task37api:
+    image: node
+    container_name: task37api9300
+    build: .
+    volumes:
+     - ./script:/usr/app
+    command: node /usr/app/task37api.js 
+    ports:
+     - "9300:9300"
+
+  sankeyapi:
+    image: node
+    container_name: sankeyapi9400
+    build: .
+    volumes:
+     - ./script:/usr/app
+    command: node /usr/app/sankey.js
+    ports:
+     - "9400:9200"
+
+volumes:
+  dbdata:
